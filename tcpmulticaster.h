@@ -34,9 +34,9 @@ public:
 		subscriptions[topic].insert(sock);
 	}
 	
-	void unsubscribe(TCPSocket* sock, string topic){
+	void unsubscribe(TCPSocket* sock, string topic, string remoteadr){
 		std::lock_guard<std::mutex> lock(mutex);
-		cout << "UNSUBSCRIBE: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
+		cout << "UNSUBSCRIBE: " << remoteadr << " TOPIC: "  << topic << endl;
 		subscriptions[topic].erase(sock);
 		delete sock;
 	}
@@ -56,9 +56,9 @@ public:
 		cout << "PUBLISHER: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic <<  endl;	
 	}
 	
-	void remove_publisher(TCPSocket* sock, string topic){
+	void remove_publisher(TCPSocket* sock, string topic, string remote){
 		std::lock_guard<std::mutex> lock(mutex);
-		cout << "PUBLISHER DISCONNECT: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
+		cout << "PUBLISHER DISCONNECT: " << remote << " TOPIC: "  << topic << endl;
 		delete sock;	
 	}
 

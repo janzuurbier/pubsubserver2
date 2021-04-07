@@ -6,34 +6,42 @@ using namespace std;
 
 tcp_multicaster themulticaster;
 
+
+
 void handle_publisher(TCPSocket* sock, string topic){
 	char buffer[103];
+	string remoteadr = "unknown";
 	
-	while (true) {
-		int n = sock->recvFully(buffer, 2);
-       	if (n == 0) break;
-       	int len = (buffer[0]-48)*10 + buffer[1]-48;
-       	n = sock->recvFully(buffer + 2, len);
-       	if (n == 0) break;
-		len += 2;
-	   	buffer[len ] = '\0';	
-		string from = sock->getForeignAddress().getAddress() + ":" + to_string(sock->getForeignAddress().getPort());
-		themulticaster.send(buffer, len,  topic, from);
-		//cout << buffer << endl;
-		
+	try{
+		remoteadr = sock->getForeignAddress().getAddress() + ":" + to_string(sock->getForeignAddress().getPort());
+		while (true) {
+			int n = sock->recvFully(buffer, 2);
+			if (n == 0) break;
+			int len = (buffer[0]-48)*10 + buffer[1]-48;
+			n = sock->recvFully(buffer + 2, len);
+			if (n == 0) break;
+			len += 2;
+			buffer[len ] = '\0';				
+			themulticaster.send(buffer, len,  topic, remoteadr);
+			//cout << buffer << endl;	
+		}
 	}
-	themulticaster.remove_publisher(sock, topic);
+	catch(SocketException& e) {}
+	themulticaster.remove_publisher(sock, topic, remoteadr);
 	
 }
 
 void handle_subscriber(TCPSocket* sock, string topic){
+	string remoteadr = "unknown";
 	char buffer[2];
-	while(true){
-		int n = sock->recvFully(buffer, 2);
-		if(n == 0) break;
+	try{	
+		remoteadr = sock->getForeignAddress().getAddress() + ":" + to_string( sock->getForeignAddress().getPort());	
+		sock->recv(buffer, 1);
+	}
+	catch(SocketException& e) {
+		themulticaster.unsubscribe(sock, topic, remoteadr);
 	}
 	
-	themulticaster.unsubscribe(sock, topic);
 	
 }
 	
