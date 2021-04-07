@@ -53,7 +53,7 @@ public:
 	
 	void add_publisher(TCPSocket* sock, string topic){
 		std::lock_guard<std::mutex> lock(mutex);
-		cout << "PUBLISHER: " << clientsock->getForeignAddress().getAddress() << ":" << clientsock->getForeignAddress().getPort() << " TOPIC: "  << topic <<  endl;	
+		cout << "PUBLISHER: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic <<  endl;	
 	}
 	
 	void remove_publisher(TCPSocket* sock, string topic){
