@@ -26,6 +26,7 @@ public:
 	
 	void subscribe(TCPSocket* sock, string topic){
 		std::lock_guard<std::mutex> lock(mutex);
+		cout << "SUBSCRIBER: " << clientsock->getForeignAddress().getAddress() << ":" << clientsock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
 		if (subscriptions.count(topic) == 0) {
 			set<TCPSocket*> myset;
 			subscriptions[topic] = myset;
@@ -35,16 +36,30 @@ public:
 	
 	void unsubscribe(TCPSocket* sock, string topic){
 		std::lock_guard<std::mutex> lock(mutex);
+		cout << "UNSUBSCRIBE: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
 		subscriptions[topic].erase(sock);
+		delete sock;
 	}
 	
 	void send(char* buffer, int len, string topic){
 		std::lock_guard<std::mutex> lock(mutex);	
+		cout <<  "**MESSAGE: "  << buffer + 2 << " FROM: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic;
 		for (std::set<TCPSocket*>::iterator it = subscriptions[topic].begin(); it != subscriptions[topic].end(); ++it)
 			try { 
 					(*it)->send(buffer, len); 
 			} 
 			catch (SocketException& e) { cout << "oeps " << e.what() << endl; /*it = subscriptions[topic].erase(it);*/ }
+	}
+	
+	void add_publisher(TCPSocket* sock, string topic){
+		std::lock_guard<std::mutex> lock(mutex);
+		cout << "PUBLISHER: " << clientsock->getForeignAddress().getAddress() << ":" << clientsock->getForeignAddress().getPort() << " TOPIC: "  << topic <<  endl;	
+	}
+	
+	void remove_publisher(TCPSocket* sock, string topic){
+		std::lock_guard<std::mutex> lock(mutex);
+		cout << "PUBLISHER DISCONNECT: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
+		delete sock;	
 	}
 
 };
