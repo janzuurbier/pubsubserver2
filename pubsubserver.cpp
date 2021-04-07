@@ -20,11 +20,9 @@ void handle_publisher(TCPSocket* sock, string topic){
 		themulticaster.send(buffer, len,  topic);
 		//cout << buffer << endl;
 		
-		cout <<  sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " PUBLISHES to TOPIC: "  << topic << " MESSAGE: "  << buffer + 2 << endl;
 	}
-	cout << "PUBLISHER DISCONNECT: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
+	themulticaster.remove_publisher(sock, topic);
 	
-	delete sock;	
 }
 
 void handle_subscriber(TCPSocket* sock, string topic){
@@ -33,9 +31,9 @@ void handle_subscriber(TCPSocket* sock, string topic){
 		int n = sock->recvFully(buffer, 2);
 		if(n == 0) break;
 	}
-	cout << "UNSUBSCRIBE: " << sock->getForeignAddress().getAddress() << ":" << sock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
+	
 	themulticaster.unsubscribe(sock, topic);
-	delete sock;
+	
 }
 	
 
@@ -65,12 +63,11 @@ int main(int argc, char *argv[]) {
 									
 			if(type == "subscription"){
 				themulticaster.subscribe(clientsock, topic);
-				cout << "SUBSCRIBER: " << clientsock->getForeignAddress().getAddress() << ":" << clientsock->getForeignAddress().getPort() << " TOPIC: "  << topic << endl;
 				thread t(handle_subscriber, clientsock, topic);
 				t.detach();
 			}
 			else if (type == "publisher"){
-				cout << "PUBLISHER: " << clientsock->getForeignAddress().getAddress() << ":" << clientsock->getForeignAddress().getPort() << " TOPIC: "  << topic <<  endl;
+				themulticaster.add_publisher(clientsock, topic);
 				thread t(handle_publisher, clientsock, topic);
 				t.detach();
 			}
