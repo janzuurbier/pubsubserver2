@@ -43,7 +43,7 @@ public:
 	
 	void send(char* buffer, int len, string topic, string from){
 		std::lock_guard<std::mutex> lock(mutex);	
-		cout <<  "**MESSAGE: "  << buffer + 2 << " FROM: " << from << " TOPIC: "  << topic;
+		cout <<  "**MESSAGE: "  << buffer + 2 << " FROM: " << from << " TOPIC: "  << topic << endl;
 		for (std::set<TCPSocket*>::iterator it = subscriptions[topic].begin(); it != subscriptions[topic].end(); ++it)
 			try { 
 					(*it)->send(buffer, len); 
