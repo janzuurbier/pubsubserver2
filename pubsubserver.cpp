@@ -34,13 +34,17 @@ void handle_publisher(TCPSocket* sock, string topic){
 void handle_subscriber(TCPSocket* sock, string topic){
 	string remoteadr = "unknown";
 	char buffer[2];
-	try{	
+	try{
+	 while(true){
 		remoteadr = sock->getForeignAddress().getAddress() + ":" + to_string( sock->getForeignAddress().getPort());	
-		sock->recv(buffer, 1);
+		int n = sock->recvFully(buffer, 2);
+		if(n == 0) break;
+	 }
 	}
 	catch(SocketException& e) {
-		themulticaster.unsubscribe(sock, topic, remoteadr);
+		
 	}
+	themulticaster.unsubscribe(sock, topic, remoteadr);
 	
 	
 }
